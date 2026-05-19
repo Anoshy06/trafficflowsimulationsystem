@@ -4,12 +4,14 @@ from typing import Dict, List
 from src.entities.vehicle import Vehicle
 from src.entities.road import Road
 from src.entities.intersection import Intersection
+from src.entities.traffic_light import TrafficLight
 
 class Simulation:
     def __init__(self):
         self.intersections: Dict[str, Intersection] = {}
         self.roads: Dict[str, Road] = {}
         self.vehicles: List[Vehicle] = []
+        self.traffic_lights: Dict[str, TrafficLight] = {}
         self.time_step = 0.1 # 100ms
         self.running = False
         
@@ -26,6 +28,13 @@ class Simulation:
         start_node.add_out_road(road)
         end_node.add_in_road(road)
         return road
+        
+    def add_traffic_light(self, id: str, road_id: str, initial_state: str = "RED"):
+        road = self.roads[road_id]
+        light = TrafficLight(id, initial_state)
+        self.traffic_lights[id] = light
+        road.traffic_light = light
+        return light
         
     def add_vehicle(self, vehicle: Vehicle):
         if not vehicle.route or len(vehicle.route) < 2:
@@ -44,6 +53,10 @@ class Simulation:
         road.add_vehicle(vehicle)
         
     def step(self):
+        # Update traffic lights
+        for light in self.traffic_lights.values():
+            light.step(self.time_step)
+            
         # Update vehicles
         for road in self.roads.values():
             # sort vehicles on this road by distance (furthest first)
@@ -56,8 +69,13 @@ class Simulation:
                     next_vehicle = road.vehicles[i-1]
                     next_vehicle_distance = next_vehicle.distance_on_road
                     
-                # check if light is red (placeholder for sprint 2)
+                # check if light is red
                 is_light_red = False
+                if road.traffic_light and road.traffic_light.state == "RED":
+                    is_light_red = True
+                elif road.traffic_light and road.traffic_light.state == "YELLOW":
+                    # For simplicity, treat yellow as red if too far from intersection (wait, just yellow=red)
+                    is_light_red = True
                 
                 vehicle.update_position(self.time_step, next_vehicle_distance, is_light_red)
                 
@@ -88,7 +106,7 @@ class Simulation:
     def get_state(self):
         state = {
             "vehicles": [],
-            "lights": [] # for sprint 2
+            "lights": []
         }
         for v in self.vehicles:
             pos = v.get_position()
@@ -98,4 +116,10 @@ class Simulation:
                     "x": pos[0],
                     "y": pos[1]
                 })
+        for light in self.traffic_lights.values():
+            state["lights"].append({
+                "id": light.id,
+                "state": light.state,
+                "road_id": [r_id for r_id, r in self.roads.items() if r.traffic_light == light][0]
+            })
         return state

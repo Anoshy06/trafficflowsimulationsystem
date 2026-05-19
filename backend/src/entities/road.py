@@ -7,6 +7,7 @@ class Road:
         self.end_node = end_node
         self.speed_limit = speed_limit
         self.vehicles = [] # Ordered list of vehicles on this road, from start to end (index 0 is furthest along)
+        self.traffic_light = None # Traffic light at the end of the road
         
         # Calculate length
         dx = end_node.x - start_node.x
