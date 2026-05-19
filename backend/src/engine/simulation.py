@@ -14,6 +14,7 @@ class Simulation:
         self.traffic_lights: Dict[str, TrafficLight] = {}
         self.time_step = 0.1 # 100ms
         self.running = False
+        self.max_vehicles = 100 # Maximum allowed vehicles to prevent simulation overflow
         
     def add_intersection(self, id: str, x: float, y: float):
         intersection = Intersection(id, x, y)
@@ -21,6 +22,8 @@ class Simulation:
         return intersection
         
     def add_road(self, id: str, start_id: str, end_id: str, speed_limit: float = 15.0):
+        if start_id not in self.intersections or end_id not in self.intersections:
+            raise KeyError("Start or End intersection not found")
         start_node = self.intersections[start_id]
         end_node = self.intersections[end_id]
         road = Road(id, start_node, end_node, speed_limit)
@@ -30,6 +33,8 @@ class Simulation:
         return road
         
     def add_traffic_light(self, id: str, road_id: str, initial_state: str = "RED"):
+        if road_id not in self.roads:
+            raise KeyError("Road not found")
         road = self.roads[road_id]
         light = TrafficLight(id, initial_state)
         self.traffic_lights[id] = light
@@ -37,8 +42,19 @@ class Simulation:
         return light
         
     def add_vehicle(self, vehicle: Vehicle):
+        # 1. Prevent Simulation Overflow
+        active_vehicles = [v for v in self.vehicles if not v.finished]
+        if len(active_vehicles) >= self.max_vehicles:
+            raise OverflowError("Simulation overflow: Maximum vehicle capacity reached!")
+
+        # 2. Validate route
         if not vehicle.route or len(vehicle.route) < 2:
             raise ValueError("Vehicle route must have at least 2 nodes")
+            
+        # 3. Check for missing nodes/intersections in route
+        for node_id in vehicle.route:
+            if node_id not in self.intersections:
+                raise ValueError(f"Intersection {node_id} in vehicle route does not exist")
             
         start_node_id = vehicle.route[0]
         end_node_id = vehicle.route[1]
