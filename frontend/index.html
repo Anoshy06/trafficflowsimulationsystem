@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Traffic Flow Simulation</title>
+    <link rel="stylesheet" href="style.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&display=swap" rel="stylesheet">
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>Traffic Flow Simulator</h1>
+            <div class="controls">
+                <button id="start-btn" class="btn primary">Start</button>
+                <button id="pause-btn" class="btn secondary">Pause</button>
+                <button id="reset-btn" class="btn danger">Reset</button>
+                <button id="add-vehicle-btn" class="btn action">Add Vehicle</button>
+            </div>
+        </header>
+
+        <main>
+            <div class="canvas-container">
+                <canvas id="sim-canvas" width="600" height="600"></canvas>
+            </div>
+
+            <aside class="dashboard">
+                <h2>Real-time Analytics</h2>
+                <div class="metric-card">
+                    <span class="label">Avg Waiting Time</span>
+                    <span class="value" id="val-wait">0.0s</span>
+                </div>
+                <div class="metric-card">
+                    <span class="label">Total Throughput</span>
+                    <span class="value" id="val-throughput">0</span>
+                </div>
+                <div class="metric-card">
+                    <span class="label">Congestion Status (Vehicles/100m)</span>
+                    <div id="val-congestion" class="congestion-list">
+                        <!-- Populated by JS -->
+                        <div class="road-item"><span>Waiting for data...</span></div>
+                    </div>
+                </div>
+            </aside>
+        </main>
+    </div>
+    <script src="app.js"></script>
+</body>
+</html>
