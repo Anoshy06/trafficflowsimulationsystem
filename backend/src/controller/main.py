@@ -1,8 +1,10 @@
 import asyncio
 import json
 import random
+import os
 from fastapi import FastAPI, WebSocket, WebSocketDisconnect
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.staticfiles import StaticFiles
 from src.engine.simulation import Simulation
 from src.entities.vehicle import Vehicle
 from src.analytics.metrics import MetricsAnalyzer
@@ -117,3 +119,7 @@ async def websocket_endpoint(websocket: WebSocket):
             await asyncio.sleep(simulation.time_step)
     except WebSocketDisconnect:
         print("Client disconnected")
+
+# Mount static frontend files
+frontend_path = os.path.abspath(os.path.join(os.path.dirname(__file__), "../../../frontend"))
+app.mount("/", StaticFiles(directory=frontend_path, html=True), name="frontend")
